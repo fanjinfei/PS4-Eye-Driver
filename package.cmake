@@ -1,0 +1,29 @@
+include("${CMAKE_SOURCE_DIR}/.cget/core.cmake" REQUIRED)
+CGET_HAS_DEPENDENCY(libusb GITHUB libusb/libusb SOLUTION_FILE msvc/libusb_2015.sln NO_FIND_PACKAGE SOLUTION_OUTPUT_DIR Win32 SOLUTION_INC_DIRS libusb)
+
+CGET_HAS_DEPENDENCY(OpenCV GITHUB opencv/opencv VERSION 3.1.0
+  OPTIONS
+  -DBUILD_WITH_STATIC_CRT:BOOL=OFF
+  -DBUILD_opencv_java:BOOL=OFF
+  -DBUILD_opencv_calib3d:BOOL=ON
+  -DBUILD_opencv_features2d:BOOL=OFF
+  -DBUILD_opencv_flann:BOOL=OFF
+  -DBUILD_opencv_ml:BOOL=OFF
+  -DBUILD_opencv_videoio:BOOL=ON
+  -DBUILD_opencv_video:BOOL=ON
+  -DBUILD_opencv_superres:BOOL=OFF
+  -DBUILD_opencv_highgui:BOOL=ON
+  -DBUILD_opencv_python:BOOL=OFF
+  -DBUILD_opencv_python2:BOOL=OFF
+  -DBUILD_opencv_python3:BOOL=OFF
+  -DBUILD_opencv_photo:BOOL=OFF
+  -DBUILD_opencv_shape:BOOL=OFF
+  -DBUILD_FAT_JAVA_LIB:BOOL=OFF
+  -DBUILD_TESTS:BOOL=OFF
+  -DBUILD_PERF_TESTS:BOOL=OFF
+  -DBUILD_PACKAGE:BOOL=OFF
+  -DBUILD_DOCS:BOOL=OFF
+  -DBUILD_opencv_apps:BOOL=OFF
+  -DANDROID:BOOL=OFF
+  -DWITH_VTK:BOOL=OFF
+  -DWITH_WIN32UI:BOOL=ON)
