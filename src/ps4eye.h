@@ -71,11 +71,13 @@ namespace std {
 
 #include <stdint.h>
 
-#if defined(DEBUG)
-#define debug(x...) fprintf(stdout,x)
-#else
-#define debug(x)
-#endif
+//#if defined(DEBUG)
+#define _debug2(line, x...) fprintf(stdout, #line ": " x)
+#define _debug1(line, x...) _debug2(line, x)
+#define debug(x...) _debug1(__LINE__, x)
+//#else
+//#define debug(x...)
+//#endif
 
 typedef struct eyeframe
 {

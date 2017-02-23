@@ -2,9 +2,9 @@
 #include <string.h>
 #include <thread>
 
-#include <opencv2\core.hpp>
-#include <opencv2\highgui.hpp>
-#include <opencv2\imgproc.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 
 #include "ps4eye.h"
 
@@ -135,6 +135,7 @@ int main() {
 
 
 		bool res = eye->init(1, 120);
+
 		std::cout << res << std::endl;
 
 		eye->start();
@@ -157,7 +158,6 @@ int main() {
 	cv::namedWindow("right");
 
 	std::thread updateThread(update);
-
 
 //	eye->start_sensors_streaming();
 	while (!finish) {

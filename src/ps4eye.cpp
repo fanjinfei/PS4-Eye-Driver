@@ -45,6 +45,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <chrono>
+#include <thread>
+
 #if defined __MACH__ && defined __APPLE__
 #include <mach/mach.h>
 #include <mach/mach_time.h>
@@ -244,7 +246,7 @@ int USBMgr::sTotalDevices = 0;
 
 USBMgr::USBMgr() {
 	libusb_init(&usb_context);
-	libusb_set_debug(usb_context, 3);
+	libusb_set_debug(usb_context, 5);
 }
 
 USBMgr::~USBMgr() {
@@ -306,7 +308,7 @@ static void LIBUSB_CALL cb_xfr(struct libusb_transfer *xfr);
 
 class URBDesc {
 public:
-	URBDesc(UINT mode) :
+	URBDesc(unsigned mode) :
 			num_transfers(0), last_packet_type(DISCARD_PACKET), last_pts(0), last_fid(
 					0) {
 		is_streaming = false;
@@ -780,7 +782,7 @@ void PS4EYECam::multia7_register_write(const uint16_t data[][3], uint8_t len) {
 					| LIBUSB_RECIPIENT_DEVICE,
 			SET_REGISTER, 0, 0, len * 4 + 8, buffer_out);
 
-	Sleep(1000);
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	delete[] buffer_out;
 	debug("END MULTIWRITE USB\n");
 }
@@ -851,8 +853,8 @@ void PS4EYECam::multi_register_write(const uint16_t data[][2], uint8_t len,
 					| LIBUSB_RECIPIENT_DEVICE,
 			SET_REGISTER, 0, 0, len * 4 + 8, buffer_out);
 
-	//sleep(1);
-	Sleep(1000);
+	//std::this_thread::sleep_for(std::chrono::milliseconds(1);
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	delete[] buffer_out;
 	debug("END MULTIWRITE USB\n");
 }
@@ -874,7 +876,7 @@ void PS4EYECam::dump_registers(uint16_t start, uint16_t finish,
 		} else {
 			debug("READ register 0x%04x: READ ERROR ",start);
 		}
-		//   sleep(1);
+		//   std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		start++;
 	}debug("READ FROM SUBADDR 0x%02x END \n",subaddr);
 }
@@ -896,7 +898,7 @@ void PS4EYECam::multi_register_read(const uint16_t (*data), uint8_t len,
 		} else {
 			debug("READ register 0x%04x: READ ERROR ",data[i]);
 		}
-		// sleep(1);
+		// std::this_thread::sleep_for(std::chrono::milliseconds(1);
 	}
 }
 
@@ -1031,7 +1033,7 @@ uint8_t PS4EYECam::register_read(uint16_t reg, uint8_t subaddr) {
 	 debug("prein %d: 0x%02x \n",i,buffer_out[i]);
 	 }*/
 
-	Sleep(1);
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 	/*Receive register to read from subaddr*/
 	submitAndWait_controlTransfer(
@@ -1312,7 +1314,7 @@ bool PS4EYECam::read_sensor_id(uint8_t n) {
 	}debug("read sensor_id from sensor %d\n",n);
 
 	sensor_id_h = register_read(OV9713_CHIP_ID_HI, n);
-	Sleep(1000);
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	sensor_id_l = register_read(OV9713_CHIP_ID_LO, n);
 	sensor_id = sensor_id_h << 8 | sensor_id_l;
 	debug("sensor %d id 0x%04x \n",n,sensor_id);
@@ -1480,23 +1482,25 @@ bool PS4EYECam::init(uint32_t width, uint32_t height,
 	myframe.videoRightFrame = (uint8_t *) malloc(1280 * 800 * 2);
 	myframe.unknown3 = (uint8_t *) malloc(840 * 800 * 2);
 
-	if (!check_sensors()) {
-		debug("Sanity check from sensors failed\n");
+	//if (!check_sensors()) {
+	//	debug("Sanity check from sensors failed\n");
 		//set_led_off();
 		//reset_sensors();
-		return false;
-	}
+	//	return false;
+	//}
 	/*  TODO play with video modes perhaps we will need to go to uvc path without ov580 information.
 	 debug("Show video mode registers from sensor 1\n");
 	 dump_sensor_video_mode(1);
 	 debug("Show video mode registers from sensor 2\n");
 	 dump_sensor_video_mode(2);
 	 set_sensor_video_mode(5, 3);
-	 sleep(2);
+	 std::this_thread::sleep_for(std::chrono::milliseconds(2);
+	 */
 	 debug("Show video mode registers from sensor 1\n");
 	 dump_sensor_video_mode(1);
 	 debug("Show video mode registers from sensor 2\n");
-	 dump_sensor_video_mode(2);*/
+	 dump_sensor_video_mode(2);
+	set_led_on();
 
 	
 	 if(!init_registers())
@@ -1584,18 +1588,19 @@ bool PS4EYECam::init(uint8_t initmode, uint8_t desiredFrameRate) {
 	}
 
 	frame_stride = frame_width * 2;
-//	if (!check_sensors()) {
-//		debug("Sanity check from sensors failed\n");
-//		//set_led_off();
-//		//reset_sensors();
-//		return false;
-//	}
-//
-//	if (!init_registers()) {
-//		debug("Initialization registers failed\n");
-//		return false;
-//	}
+	//if (!check_sensors()) {
+	//	debug("Sanity check from sensors failed\n");
+		//set_led_off();
+		//reset_sensors();
+		//return false;
+	//}
 
+	/*
+	if (!init_registers()) {
+		debug("Initialization registers failed\n");
+		return false;
+	}
+*/
 	return true;
 }
 
@@ -1626,7 +1631,7 @@ void PS4EYECam::stop() {
 	// close urb
 	urb->close_transfers();
 	is_streaming = false;
-	Sleep(1000);
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 	// urb->is_streaming=false;
 
@@ -1634,7 +1639,7 @@ void PS4EYECam::stop() {
 void PS4EYECam::shutdown() {
 	debug("PS4EYECAM shutdown called wait...\n");
 	stop();
-	Sleep(2000);
+	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 	urb->num_transfers = 0;
 	// release();
 }
@@ -1647,7 +1652,7 @@ void PS4EYECam::check_ff71() {
 		val = register_read(0xff71, 0xff);
 		if (val == 0x0) {
 			debug("i=%d Write register 0xff70 to f1\n",urb->ff71status);
-//   usleep(1);
+//   ustd::this_thread::sleep_for(std::chrono::milliseconds(1);
 			multi_register_write(ov580_reg_stream_w0,
 					ARRAY_SIZE(ov580_reg_stream_w0), 0xff);
 			urb->ff71status = 1;
@@ -1659,7 +1664,7 @@ void PS4EYECam::check_ff71() {
 		debug("i=%d Write register 0xff70 to 01\n",urb->ff71status);
 		multi_register_write(ov580_reg_stream_w1,
 				ARRAY_SIZE(ov580_reg_stream_w1), 0xff);
-		Sleep(1);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		val = register_read(0xff71, 0xff);
 		debug("i=%d val=%d\n",urb->ff71status,val);
 		urb->ff71status = 2;
@@ -1676,7 +1681,7 @@ void PS4EYECam::check_ff71() {
 
 		val = register_read(0xff71, 0xff);
 		debug("i=%d val=%d\n",urb->ff71status,val);
-		Sleep(1);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 		val = register_read(0xff71, 0xff);
 		debug("i=%d val=%d\n",urb->ff71status,val);
@@ -2454,13 +2459,9 @@ bool PS4EYECam::open_usb() {
 	}debug("configuration set to 1\n");
 
 	res = libusb_claim_interface(handle_, 0);
-	
 
 	// mode 2 turns on auto exposure
 	uvc_set_ae_mode(2);
-
-
-
 
 	//set all setting 0 to interface 1
 	//claim interface 1
@@ -2468,13 +2469,15 @@ bool PS4EYECam::open_usb() {
 	if (res != 0) {
 		debug("device claim interface error: %d\n", res);
 		return false;
-	}debug("claim interface 1\n");
+	}
+    debug("claim interface 1\n");
 
 	res = libusb_set_interface_alt_setting(handle_, 1, 0);
 	if (res != 0) {
 		debug("device claim interface error: %d\n", res);
 		return false;
-	}debug("claim interface 1\n");
+	}
+    debug("claim interface 1\n");
 
 //	uvc_show_video_mode();
 	uvc_set_video_mode(mode, frame_rate);
@@ -2509,7 +2512,7 @@ bool PS4EYECam::open_usb() {
 	 cout << sal << "Max brightness " << brightness<< endl;
 	 set_led_on();*/
 
-	Sleep(1);
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 	return true;
 }
@@ -2643,7 +2646,7 @@ void PS4EYECam::firmware_upload() {
 
 			chunk[8] = 0x5b;
 			submit_controlTransfer(0x40, 0x0, 0x2200, 0x8018, 1, chunk);
-			Sleep(1000);
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 			libusb_cancel_transfer(control_transfer);
 
 			cout << "Firmware uploaded..." << endl;
